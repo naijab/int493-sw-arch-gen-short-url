@@ -4,6 +4,7 @@
 ## Before run
 
 - install rust with [rustup.rs](https://rustup.rs/)
+- run `rustup default nightly`
 
 ## How to run
 
