@@ -1,31 +1,42 @@
 version: "3.2"
 services:
 
-    node_1:
-        container_name: node_1
-        image: cockroachdb/cockroach:latest
-        volumes:
-            - ./data/node_1:/cockroach/cockroach-data
-        command: start --insecure
-        ports:
-            - "26257:26257"
-            - "8080:8080"
-        networks:
-            cockroachdb_net:
-                aliases:
-                  - node_1
+    roach-runner:
+      image: cockroachdb/cockroach:latest
+      restart: on-failure
+      depends_on:
+        - roach_node_1
+        - roach_node_2
+      volumes:
+        - ./sql-init.d:/docker-entrypoint-initdb.d
+        - ./script/init-db.sh:/usr/local/bin/init-db.sh:ro
+      command:
+        - "shell"
+        - "/usr/local/bin/init-db.sh"
+        - "roach_node_1:26257"
+      networks:
+        - roach-network
 
-    node_2:
-        container_name: node_2
+    roach_node_1:
+        container_name: roach_node_1
         image: cockroachdb/cockroach:latest
         volumes:
-            - ./data/node_2:/cockroach/cockroach-data
-        command: start --insecure --join=node_1
+          - ./data/node_1:/cockroach/cockroach-data
+        command: start --insecure --join=roach_node_1,roach_node_2
+        ports:
+          # web ui
+          - "127.0.0.1:8080:8080"
         networks:
-            cockroachdb_net:
-                aliases:
-                  - node_2
+          - roach-network
+
+    roach_node_2:
+        container_name: roach_node_2
+        image: cockroachdb/cockroach:latest
+        volumes:
+          - ./data/node_2:/cockroach/cockroach-data
+        command: start --insecure --join=roach_node_1,roach_node_2
+        networks:
+          - roach-network
 
 networks:
-    cockroachdb_net:
-        driver: bridge
+  roach-network:
