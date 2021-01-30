@@ -1,11 +1,30 @@
 use rocket_contrib::json::{JsonValue};
 use rand::Rng;
 
-#[get("/url_shortener")]
-pub fn get_url() -> JsonValue {
+#[get("/<short_url>")]
+pub fn get_full_url(short_url: String) -> JsonValue {
+    if short_url.trim().is_empty() {
+        return json!({
+            "error": "request invalid, please put short url slug",
+        })
+    }
+    return json!({
+        "short_url": format!("http://localhost:8000/{}", short_url),
+    })
+}
+
+#[get("/url_shortener?<full_url>")]
+pub fn get_short_url(full_url: String) -> JsonValue {
+    if full_url.trim().is_empty() {
+        return json!({
+            "error": "request invalid, please put full url query",
+        })
+    }
+
     let url = shorten();
     return json!({
-        "url": format!("http://localhost:8000/{}", url),
+        "full_url": full_url,
+        "short_url": format!("http://localhost:8000/{}", url),
     })
 }
 

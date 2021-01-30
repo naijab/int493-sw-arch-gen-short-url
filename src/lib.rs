@@ -28,8 +28,9 @@ fn cors_fairing() -> Cors {
 pub fn rocket() -> rocket::Rocket {
   dotenv().ok();
   rocket::custom(config::from_env())
-    .mount("/api", routes![
-      routes::url_shortener::get_url,
+    .mount("/", routes![
+      routes::url_shortener::get_short_url,
+      routes::url_shortener::get_full_url,
     ])
     .attach(cors_fairing())
     .register(catchers![not_found])
