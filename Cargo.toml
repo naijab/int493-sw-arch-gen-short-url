@@ -5,9 +5,12 @@ authors = ["Nattapon Pondongnok <nainatjab999@gmail.com>", "Patanasak Leksirimon
 edition = "2018"
 
 [dependencies]
+dotenv = "0.15.0"
+
+rand = "0.8.3"
+
 rocket = "0.4.6"
 rocket_cors = { version = "0.5.1", default-features = false }
-dotenv = "0.15.0"
 
 [dependencies.rocket_contrib]
 version = "0.4.6"

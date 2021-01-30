@@ -29,7 +29,7 @@ pub fn rocket() -> rocket::Rocket {
   dotenv().ok();
   rocket::custom(config::from_env())
     .mount("/api", routes![
-      routes::url_shortener::check_url,
+      routes::url_shortener::get_url,
     ])
     .attach(cors_fairing())
     .register(catchers![not_found])
