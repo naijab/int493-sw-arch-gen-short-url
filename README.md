@@ -1,11 +1,12 @@
 # homework-2-kotlin
 
 ## Must install
-- java 11
+- docker, docker-compose
 
 ## how to run
-- run `./gradlew clean build` or windows use `./gradlew.bat clean build`
-- run `java -jar build/libs/homework-2-kotlin-0.0.1-all.jar` on port 8080
+- run `docker-compose up -d --build`
+- open http://localhost
+- run `docker-compose ps` for status
 
 ## how to build
 - run `./gradlew clean build` or windows use `./gradlew.bat clean build`
