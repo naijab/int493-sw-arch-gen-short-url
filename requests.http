@@ -1,0 +1,10 @@
+###
+# @name newHero
+Post http://localhost:8000/keptUrls
+Content-Type: application/json
+
+{
+    "name": "The Deep",
+    "canFly": true
+}
+

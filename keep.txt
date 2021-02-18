@@ -1,0 +1,382 @@
+/*
+#[macro_use]
+extern crate rocket;
+use rocket_contrib::json::Json;
+use serde::Serialize;
+use rusqlite::Connection;
+
+#[derive(Serialize)]
+struct ToDoList{
+    item: Vec<ToDoItem>,
+}
+
+#[derive(Serialize)]
+struct ToDoItem{
+    id: i64,
+    item: String,
+}
+
+#[derive(Serialize)]
+struct StatusMessage {
+    message: String,
+}
+
+
+#[get("/")]
+fn index() -> &'static str{
+    "hello, world"
+}
+
+#[get("/todo")]
+fn fetch_all_todo_items() -> Result<Json<ToDoList>, String>{
+    let db_connection = match Connection::open("data.sqlite"){
+        Ok(connection) => connection,
+        Err(_) => {
+            return Err(String::from("Failed to connect to database"))
+        }
+    };
+} 
+
+
+#[get("/shortUrl")]
+fn short_url() -> String {
+    use rand::Rng;
+    let alphanumeric_keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_string();
+    let _chars: Vec<char> = alphanumeric_keys.chars().collect();
+    let mut short_url = String::new();
+    let mut rng = rand::thread_rng();
+    
+    let mut n = 0;
+    
+    //Change condition for length of url here.
+    while n<6 {
+        short_url.push( alphanumeric_keys.chars().nth(rng.gen_range(0..61)).unwrap() as char );
+        n+=1;
+    }
+    
+    format!("gen shorten URL : {}",short_url.as_str())
+}
+
+#[get("/shortUrlLib")]
+fn short_url_lib() -> String{
+    use urlshortener::{providers::Provider, client::UrlShortener};
+    let us = UrlShortener::new().unwrap();
+    print!("{:?}",us.generate("https://github.com/patanasak" , &Provider::IsGd));
+    format!("gen shorten URL with Lib : {:?}", us.generate("https://github.com/patanasak" , &Provider::IsGd))
+}
+
+fn main() {
+    //rocket::ignite().mount("/", routes![hello ,short_url , short_url_lib , p , test_json]).launch();
+    {
+        let db_connection = rusqlite::Connection::open("data.sqlite").unwrap();
+
+        db_connection
+                .execute("Create table if not exitsts todo_list (
+                            id integer primary key,
+                            item varchar(64) not null
+                            )",
+                            rusqlite::NO_PARAMS,
+                ).unwrap();
+    
+    }
+    rocket::ignite().mount("/", routes![index]).launch();
+}
+
+
+*/
+
+
+
+
+
+
+//^^^^^^^^^^^=== {         rusqlite            }======^^^^^^^^^^^^^^^^^^^^^^^^^^
+//------------------------------------------------------------------------------
+//^^^^^^^^^^^=== {         rusqlite            }======^^^^^^^^^^^^^^^^^^^^^^^^^^
+//------------------------------------------------------------------------------
+//^^^^^^^^^^^=== {         rusqlite            }======^^^^^^^^^^^^^^^^^^^^^^^^^^
+//------------------------------------------------------------------------------
+
+
+
+
+/*
+
+
+
+
+extern crate rusqlite;
+extern crate time;
+
+use rusqlite::SqliteConnection;
+
+#[derive(Debug)]
+struct kepturl {
+    id: i32,
+    url: String,
+    data: Option<Vec<u8>>
+}
+
+
+
+#[post("/heroes", format = "json" , data = "<hero>")]
+fn add_url(
+   
+
+}
+*/
+
+
+//use serde::{Serialize, Deserialize};
+
+/*
+#[get("/")]
+fn index() -> &'static str {
+    "Hello, world!"
+}
+
+#[get("/hello")]
+fn hello() -> &'static str {
+    "Hello, outside world!"
+}
+
+#[post("/testPost/<text>")]
+fn p(text: String) -> String {
+    format!("Post Text: {}!", text)
+}
+
+
+#[post("/testJson/<get_url>")]
+fn test_json(get_url: String) -> String {
+    format!("Post URL : {}!", get_url )
+}
+*/
+
+
+/////////////////////////////////////////////////////////
+
+
+//taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaam
+//region Simple REST API
+/*
+
+#![feature(proc_macro_hygiene, decl_macro)]
+#[cfg_attr(debug_assertions,allow(dead_code,unused_imports))]
+#[macro_use]extern crate rocket;
+use reqwest;
+use rocket_contrib::{
+    json,
+    json::{Json, JsonValue,JsonError}
+    };
+use serde::{Serialize , Deserialize};
+use std::{
+    string::String,
+    result::Result,
+    sync::{ RwLock , atomic::{AtomicUsize , Ordering} , RwLockWriteGuard },
+    collections::HashMap,
+    str,
+    };
+use rocket::{ 
+        Rocket,
+        State,
+        response::status::Created,
+        Request,
+        Data,
+        uri,
+        get,post,
+    };
+
+
+type ID = usize;
+
+#[derive(Serialize , Debug , Clone)]
+struct KeptUrl {
+    id: ID,
+    url: String,
+    #[serde(rename(serialize = "canFly"))]
+    can_fly: bool,
+}
+
+
+#[derive(Deserialize, Debug)]
+struct NewKeptUrl {
+    url: String,
+    #[serde(rename(deserialize = "canFly"))]
+    can_fly: bool,
+}
+
+#[post("/testJson/<get_url>")]
+fn test_json(get_url: String) -> String {
+    format!("Post URL : {}!", get_url )
+}
+
+struct KeptUrlCount(AtomicUsize);
+type KeptUrlMap = RwLock<HashMap<ID,KeptUrl>>;
+
+
+#[post("/keptUrls", format = "json" , data = "<keptUrl>")]
+fn add_url(
+    keptUrl: Json<NewKeptUrl>,
+    keptUrl_state: State<'_, KeptUrlMap>,
+    keptUrl_count: State<'_, KeptUrlCount>,
+) -> String {
+    let hid = keptUrl_count.0.fetch_add(1, Ordering::Relaxed);
+
+    let new_keptUrl = KeptUrl {
+        id: hid,
+        url: keptUrl.0.url,
+        can_fly: keptUrl.0.can_fly,
+    };
+
+    let mut keptUrls = keptUrl_state.write().unwrap();
+    keptUrls.insert(hid, new_keptUrl.clone());
+
+    //let location = uri!("/" ,get_keptUrl: hid);
+    //Created::new(location.to_string()).body(Json(new_keptUrl));
+    return format!("OK");
+}
+
+#[get("/keptUrls/<id>")]
+fn get_keptUrl(id: ID , keptUrl_state: State<'_, KeptUrlMap>) -> Option<Json<KeptUrl>> {
+    let keptUrls = keptUrl_state.read().unwrap();
+    keptUrls.get(&id).map(|h| Json(h.clone()))
+}
+
+#[get("/keptUrls")]
+fn get_all(keptUrl_state: State<'_,  KeptUrlMap>) -> Json<Vec<KeptUrl>> {
+    let keptUrls = keptUrl_state.read().unwrap();
+    Json(keptUrls.values().map(|v| v.clone()).collect())
+}
+
+fn rocket() -> rocket::Rocket {
+    rocket::ignite().mount("/", routes![add_url, get_keptUrl , get_all])
+    .manage(RwLock::new(HashMap::<ID , KeptUrl>::new()))
+    .manage(KeptUrlCount(AtomicUsize::new(1)))
+}
+
+
+fn main(){
+    rocket::ignite().mount("/", routes![add_url, get_keptUrl , get_all]).launch();
+}
+  
+*/
+//taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaam
+
+/*
+#[post("/inputUrl", format = "json" , data = "<url_>" )]
+fn add_url( url_: Json<NewURL>, 
+            url_state : State<'_, URLsMap>,
+            url_count : State<'_, URLsCount>,
+    ) -> Created<Json<Url_>> {
+
+        //gen unique url ID
+        let url_id = url_count.0.fetch_add(1, Odering::Relaxed);
+
+        //Build new URL
+        let new_url = Url_ {
+            id: url_id,
+            url: url_.0.url_link
+        };
+            //insert new URLs in hashmap
+            let mut urls_ = url_state.write().unwarp();
+            urls_.insert(new_url.clone());
+            
+            // Use uri macro
+            let location =uri!("/api", get_urls: url_id);
+            Create::new(location.to_String()).body(Json(new_url))
+
+    }
+
+#[get("/urls/<id>")]
+fn get_urls(id: ID, url_state: State<'_, URLsMap>) -> Option<Json<Url>> {
+    let urls_ = url_state.read().unwarp();
+    urls_.get(&id).map(|h| Json(h.close()))
+}
+*/
+
+
+
+//////////////////////
+
+
+/*
+#[post("/hello/<text>")]
+fn hello_Text(text: String) -> String {
+    format!("Hello, {}!", text)
+}
+*/
+/*
+#[get("/shortUrl")]
+fn short_url() -> String {
+    use rand::Rng;
+    let alphanumeric_keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_string();
+    let _chars: Vec<char> = alphanumeric_keys.chars().collect();
+    let mut short_url = String::new();
+    let mut rng = rand::thread_rng();
+    
+    let mut n = 0;
+    
+    //Change condition for length of url here.
+    while n<6 {
+        short_url.push( alphanumeric_keys.chars().nth(rng.gen_range(0..61)).unwrap() as char );
+        n+=1;
+    }
+    
+    format!("gen shorten URL : {}",short_url.as_str())
+}
+
+#[get("/shortUrlLib")]
+fn short_url_lib() -> String{
+    use urlshortener::{providers::Provider, client::UrlShortener};
+    let us = UrlShortener::new().unwrap();
+    print!("{:?}",us.generate("https://github.com/patanasak" , &Provider::IsGd));
+    format!("gen shorten URL with Lib : {:?}", us.generate("https://github.com/patanasak" , &Provider::IsGd))
+}
+
+fn main() {
+    //rocket::ignite().mount("/", routes![hello ,short_url , short_url_lib , p , test_json]).launch();
+    rocket::ignite().mount("/", routes![]).launch();
+}
+
+*/
+
+
+/*
+#[post("/shortUrl")]
+fn short_url() -> &'static str{
+    //Try to make
+    use rand::Rng;
+    let alphanumeric_keys = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".to_string();
+    let _chars: Vec<char> = alphanumeric_keys.chars().collect();
+    let mut short_url = String::new();
+    let mut rng = rand::thread_rng();
+    
+    let mut n = 0;
+    
+    //Change condition for length of url here.
+    while n<6 {
+        short_url.push( alphanumeric_keys.chars().nth(rng.gen_range(0..61)).unwrap() as char );
+        n+=1;
+    }
+    
+    return short_url.as_str()
+}
+
+
+#[post("/shortUrl")]
+fn short_url_lib() -> &'static str{
+    //Read Docs
+    //https://docs.rs/urlshortener/3.0.0/urlshortener/
+    //An easy library for retrieving short urls.
+
+    use urlshortener::{providers::Provider, client::UrlShortener};
+
+    let us = UrlShortener::new().unwrap();
+    //let short_url = us.generate("https://github.com/patanasak", &Provider::IsGd);
+    print!("{:?}",us.generate("https://github.com/patanasak" , &Provider::IsGd));
+    //return short_url.is_ok().to_string();
+
+    let sl = ("{:?}",us.generate("https://github.com/patanasak" , &Provider::IsGd))
+
+}
+*/
