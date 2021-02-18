@@ -9,12 +9,13 @@ val logback_version: String by project
 plugins {
     application
     kotlin("jvm") version "1.4.10"
+    id("com.github.johnrengelman.shadow") version "5.0.0"
 }
 
 group = "homework_group6"
 version = "0.0.1"
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClassName = "homework_2_group6.ApplicationKt"
 }
 
 repositories {
@@ -33,4 +34,14 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     testImplementation("io.ktor:ktor-server-tests:$ktor_version")
+}
+
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    shadowJar {
+
+    }
 }
