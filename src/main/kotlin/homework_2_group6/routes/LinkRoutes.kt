@@ -49,7 +49,7 @@ fun Routing.linkRoutes() {
         call.application.environment.log.info("Short URL : $shortUrl")
 
         val baseUrl = "http://sh.a6.tnpl.me"
-        call.respond(HttpStatusCode.OK, LinkResponse("${baseUrl}/$shortUrl"))
+        call.respond(HttpStatusCode.OK, LinkResponse("${baseUrl}/l/$shortUrl"))
     }
 
 }
