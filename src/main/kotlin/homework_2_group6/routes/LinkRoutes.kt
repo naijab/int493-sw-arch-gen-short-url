@@ -37,8 +37,7 @@ fun Routing.linkRoutes() {
             if (!isHaveProtocol) {
                 result = "http://${fullUrl}"
             }
-
-            call.respondRedirect(result, true)
+            call.respondRedirect(result, false)
         }
     }
 
